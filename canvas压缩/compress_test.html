@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<input type="file" id="upload">
+</body>
+<script>
+const ACCEPT = ['image/jpg', 'image/png', 'image/jpeg'],
+    MAXSIZE = 3 * 1024 * 1024,
+    MAXSIZE_STR = '3MB',
+    upload = document.querySelector('#upload'),
+    // 转换为 64 进制
+    convertImageToBase64 = (file, callBack) => {
+        let reader = new FileReader();
+        reader.addEventListener('load', (e) => {
+            const base64Image = reader.result;
+            callBack && callBack(base64Image);
+            // 回收内存
+            reader = null;
+        })
+        // 转换为 url
+        reader.readAsDataURL(file)
+    },
+    compress = (base64Image, callBack) => {
+        let maxW = 1024,
+            maxH = 1024,
+            image = new Image();
+        image.addEventListener('load', (e) => {
+            let ratio, // 压缩比
+                needCompress = false;  // 是否需要压缩
+            if (image.naturalWidth > maxW) {
+                ratio = image.naturalWidth / maxW;
+                maxH = image.naturalHeight / ratio;
+                needCompress = true;
+            }
+            if (image.naturalHeight > maxH) {
+                ratio = image.naturalHeight / maxH;
+                maxW = image.naturalWidth / ratio;
+                needCompress = true;
+            }
+            if (!needCompress) {
+                maxH = image.naturalHeight;
+                maxW = image.naturalWidth;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = maxW;
+            canvas.height = maxH;
+            canvas.style.visibility = 'visible';
+
+            const ctx = canvas.getContext('2d');
+            ctx.fillRect(0, 0, maxW, maxH);
+            ctx.drawImage(image, 0, 0, maxW, maxH);
+            const compressImag = canvas.toDataURL('image/jpeg', 0.9);
+            callBack && callBack(compressImag);
+            canvas.remove();
+        })
+        image.src = base64Image;
+    },
+    uploadToServer = (compressImag) => {
+        console.log('upload to sever', compressImag);
+    }
+upload.addEventListener('change', (e) => {
+    const [file] = e.target.files;
+    let {type: fileType, size: fileSize} = file;
+    if (!ACCEPT.includes(fileType)) {
+        alert(`暂不支持${fileType}类型数据上传`)
+        return
+    }
+    if (fileSize > MAXSIZE) {
+        alert(`不支持超过${fileSize}的文件`);
+        return;
+    }
+    convertImageToBase64(file, (base64Image) => compress(base64Image, uploadToServer))
+})
+</script>
+</html>

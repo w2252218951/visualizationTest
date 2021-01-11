@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<input type="file" id="upload">
+</body>
+<script>
+/**
+ * 1 创建input 输入框 设置为文件类型
+ * 2 设置文件宽高 大小值
+ * 3 获取input文件 监听其改变事件 判断文件是否符合上传要求
+ * 4 符合上传要求后进行上传处理  先将图片转换为 base64 的字符传
+ * 5 通过 新建FileReader实例的 readeAsDataUrl() 方法进行转码
+ * 6 将转码后的图片进行压缩处理
+ * 7 设置图片压缩的宽高
+ * 8 新建图片实例 通过 src 将 转码后的图片赋值给 当前实例
+ * 9 监听当前实例的加载方法  初始化 压缩比 ratio 是否需要压缩 needPress
+ * 10 通过实例获得 naturalWidth naturalHeight 进行压缩判断
+ * 11 如果不需要压缩 需要将 图片当前实际长宽 赋值给 初始值 ！！！！！！！！
+ * 12 实例化 canvas 使用先前的初始值设置canvas 的长宽
+ * 13 设置ctx 获得canvas的 2d 状态  通过 clearRect清除先前绘制的区域
+ * 14 通过ctx drawImage(image, 0, 0 ,maxW, maxH) 绘制图片    第一次压缩！！！！！！！！！！
+ * 15 通过canvas 方法 toDataUrl('image/jpg', 0.9) 生成压缩后的 图片链接   第二次压缩 ！！！！！！！！！！！
+ * 16 通过回调将当前生成的图片 上传到服务器
+ */
+
+
+const ACCEPT = ['image/jpeg', 'image/png', 'image/jpg'],
+    MAXSIZE = 3 * 1024 * 1024,
+    MAXSIZE_NAME = '3MB',
+    upload = document.querySelector('#upload'),
+    convertImageToBase64 = (file, callback) => {
+        // 用来读取文件内容
+        let reader = new FileReader();
+        reader.addEventListener('load', (e) => {
+            const base64Image = reader.result;
+            callback && callback(base64Image);
+            // 回收内存
+            reader = null;
+        })
+        reader.readAsDataURL(file);
+    },
+    compress = (base64Image, callBack) => {
+        const image = new Image();
+        let maxW = 1024,
+            maxH = 1024;
+        image.src = base64Image;
+        image.addEventListener('load', () => {
+            let ratio, // 图片压缩比
+                needCompress;   // 是否需要压缩
+            if (image.naturalWidth > maxW) {
+                ratio = image.naturalWidth / maxW
+                maxH = image.naturalHeight / ratio
+                needCompress = true;
+            }
+            if (image.naturalHeight > maxH) {
+                ratio = image.naturalHeight / maxH;
+                maxW = image.naturalWidth / ratio
+                needCompress = true
+            }
+            // 如果不需要压缩 就讲实际大小赋值给最大值
+            if (!needCompress) {
+                maxH = image.naturalHeight;
+                maxW = image.naturalWidth;
+            }
+
+            // 获取最大宽高后生成 canvas 进行压缩
+            const canvas = document.createElement('canvas');
+            canvas.width = maxW;
+            canvas.height = maxH;
+            canvas.style.visibility = 'visible';
+            document.body.appendChild(canvas);
+
+            const ctx = canvas.getContext('2d');
+            // 清除矩形
+            ctx.clearRect(0, 0, maxW, maxH);
+            // 第一次压缩
+            ctx.drawImage(image, 0, 0, maxW, maxH);
+            // 第二次压缩
+            const compressImage = canvas.toDataURL('image/jpeg', 0.9);
+            callBack && callBack();
+            let _image = new Image();
+            _image.src = compressImage;
+            document.body.appendChild(_image);
+            canvas.remove();
+        })
+        console.log(image);
+        document.body.appendChild(image)
+
+        console.log(base64Image);
+    },
+    uploadServer = (compressImage) => {
+        console.log('upload to server');
+    }
+upload.addEventListener('change', (e) => {
+    const [file] = e.target.files;
+    if (!file) {
+        return
+    }
+    const {type: fileType, size: fileSize} = file;
+    // 图片类型检查
+    if (!ACCEPT.includes(fileType)) {
+        alert(`暂不支持${fileType}类型的数据`);
+        upload.value = '';
+        return;
+    }
+    // 图片大小检查
+    if (MAXSIZE < fileSize) {
+        alert(`文件大小不能超过${MAXSIZE_NAME}`);
+        upload.value = '';
+        return;
+    }
+    // 图片容量检查  需要将图片转换成base64格式
+    // 压缩图片
+    convertImageToBase64(file, (base64Image) => compress(base64Image, uploadServer))
+})
+</script>
+</html>
