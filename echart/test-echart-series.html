@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.0.1/dist/echarts.min.js"></script>
+</head>
+<style>
+    #chart {
+        width: 800px;
+        height: 400px;
+    }
+</style>
+<body>
+<div id="chart"></div>
+<script>
+const chartDome = document.querySelector('#chart');
+const chart = echarts.init(chartDome);
+chart.setOption({
+    title: {
+        text: 'echart 多系列标题'
+    },
+    xAxis: {
+        data: ['苹果', '香蕉', '西红柿', '西瓜']
+    },
+    yAxis: {},
+    series: [
+        {
+            type: 'bar',
+            data: [12, 44, 22, 66]
+        },
+        {
+            type: 'pie',
+            center: ['65%',50],
+            // 半径
+            radius: 30,
+            data: [
+                {name: '分类1', value: 12},
+                {name: '分类2', value: 52},
+                {name: '分类3', value: 42},
+                {name: '分类4', value: 77},
+            ]
+        },
+        {
+            type: 'line',
+            data: [20,40,25,55]
+        }
+    ]
+})
+</script>
+</body>
+</html>

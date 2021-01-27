@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.0.1/dist/echarts.min.js"></script>
+</head>
+<style>
+    #chart{
+        width: 800px;
+        height: 400px;
+    }
+</style>
+<body>
+    <div id="chart"></div>
+</body>
+<script>
+    const chartDome = document.querySelector('#chart');
+    const chart = echarts.init(chartDome);
+    chart.setOption({
+        title: {
+            text: 'echart 标题'
+        },
+        xAxis: {
+            data: ['苹果', '香蕉', '西红柿', '西瓜']
+        },
+        yAxis: {},
+        series: [
+            {
+                type: 'bar',
+                data: [12,44,22,66]
+            }
+        ]
+    })
+</script>
+</html>

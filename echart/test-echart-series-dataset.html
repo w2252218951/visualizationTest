@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.0.1/dist/echarts.min.js"></script>
+</head>
+<style>
+    #chart {
+        width: 800px;
+        height: 400px;
+    }
+</style>
+<body>
+<div id="chart"></div>
+<script>
+const chartDome = document.querySelector('#chart');
+const chart = echarts.init(chartDome);
+chart.setOption({
+    title: {
+        text: 'Echart dataset标题'
+    },
+    dataset: {
+        source: [
+            ['香蕉', 20, 50, '分类1', 50],
+            ['荔枝', 36, 56, '分类2', 50],
+            ['苹果', 40, 28, '分类3', 50],
+            ['香肠', 50, 65],
+            ['火龙果', 30, 75],
+        ]
+    },
+    xAxis: {
+        data: ['香蕉', '荔枝', '苹果' , '香肠']
+    },
+    yAxis: {},
+    series: [
+        {
+            type: 'pie',
+            center: ['65%', 40],
+            radius: 35,
+            encode: { itemName: 3, value: 4}
+        },
+        {
+            type: 'bar',
+            encode: {x: 0 , y: 1}
+        },
+        {
+            type: 'line',
+            encode: {x: 0 , y: 2}
+        }
+    ]
+
+})
+</script>
+</body>
+</html>
